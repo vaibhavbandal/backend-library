@@ -65,7 +65,7 @@ exports.changePassword = async (req, res) => {
 
         if (!email || !password || !newPassword) {
             return res.status(200).json({
-                changedPassword: false,
+                status: false,
                 code: "BODY_DATA_MISSING",
             })
         }
@@ -73,15 +73,15 @@ exports.changePassword = async (req, res) => {
         const isLibrarian = await Librarian.findOne({ email: email });
         if (!isLibrarian) {
             return res.status(200).json({
-                changedPassword: false,
+                status: false,
                 code: "UNREGISTERED EMAIL",
             })
         }
 
         if (! await bcrypt.compare(password, isLibrarian.password)) {
             return res.status(200).json({
-                changedPassword: false,
-                code: "WRONG PASSWORD",
+                status: false,
+                code: "OLD PASSWORD IS WRONG",
             })
         }
 
@@ -92,20 +92,20 @@ exports.changePassword = async (req, res) => {
         })
         if (!changedPassword) {
             return res.status(200).json({
-                changedPassword: false,
+                status: false,
                 code: "ERROR OCCURED WHILE CHANGING PASSWORD",
             })
         }
 
         return res.status(200).json({
-            changedPassword: true,
+            status: true,
             code: "PASSWORD IS CHANGED SUCCESSFULLY",
         })
 
 
     } catch (error) {
         return res.status(400).json({
-            adminSignUp: false,
+            status: false,
             code: "API_CALLING_ERROR",
         })
     }
@@ -119,6 +119,14 @@ exports.registerStudent = async (req, res) => {
             return res.status(200).json({
                 status: false,
                 code: "MISSING_BODY_DATA",
+            })
+        }
+
+        const isEmialExists = await Student.findOne({email:email});
+        if(isEmialExists){
+            return res.status(200).json({
+                status:false,
+                code: "DUPLICATE_EMAIL",
             })
         }
 
@@ -164,18 +172,20 @@ exports.bookIssueReturn = async (req, res) => {
 
     const book=await Book.findOne({bookCode:bookCode});
     if(!book){
-        return res.status(400).json({
+        return res.status(200).json({
             code: "INVALID_BOOKCODE",
             status:false
         })
     }
 
+    const librarian= await Librarian.findById({_id:req.user.ID});
+
 // ------------------------------------------------------------
     if(type==='ISSUE'){
 
         if(!(student.bookStatus===false)){
-            return res.status(400).json({
-                code: "STUDENT_WITH_BOOK",
+            return res.status(200).json({
+                code: "STUDENT_HAS_ALREADY_BOOK",
                 status:false
             })
         }
@@ -183,7 +193,7 @@ exports.bookIssueReturn = async (req, res) => {
         // Checking quantity of given book
         const bookStore=await BookStore.findOne({bookCode:bookCode});
         if((bookStore.totalQuantity===bookStore.issueQuantity)){
-            return res.status(400).json({
+            return res.status(200).json({
                 status:false,
                 code: "BOOK_NOT_AVAILABLE",
             })
@@ -195,8 +205,15 @@ exports.bookIssueReturn = async (req, res) => {
             bookStatus:true
         }) 
 
+        
+
         const newBookIR=new BookIR({
-            book:book._id,bookCode:bookCode,student:student._id,librarian:req.user.ID,
+            book:book._id,
+            studentEmail:student.email,
+            librarianEmail:librarian.email,
+            bookCode:bookCode,
+            student:student._id,
+            librarian:req.user.ID,
             type:"ISSUE"
         })
 
@@ -215,15 +232,15 @@ exports.bookIssueReturn = async (req, res) => {
     }else if(type==='RETURN') {
 
         if(!(student.bookStatus===true)){
-            return res.status(400).json({
+            return res.status(200).json({
                 status:false,
-                code: "STUDENT_WITH_NO_BOOK",
+                code: "STUDENT_HAS_NOT_BOOK",
             })
         }
 
 
         if(!(student.bookCode===bookCode)){
-            return res.status(400).json({
+            return res.status(200).json({
                 status:false,
                 code: "STUDENT_WITH_WRONG_BOOKCODE",
             })
@@ -240,7 +257,10 @@ exports.bookIssueReturn = async (req, res) => {
 
 
         const newBookIR=new BookIR({
-            book:book._id,bookCode:bookCode,student:student._id,
+            book:book._id,
+            studentEmail:student.email,
+            librarianEmail:librarian.email,
+            bookCode:bookCode,student:student._id,
             librarian:req.user.ID,type:"RETURN"
         })
 
@@ -260,14 +280,11 @@ exports.bookIssueReturn = async (req, res) => {
 
  
     }else{
-        return res.status(400).json({
+        return res.status(200).json({
             status:false,
             code: "INVALID_TYPE",
         })
     }
-
- 
-   
 
 
 }

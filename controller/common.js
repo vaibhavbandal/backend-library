@@ -5,6 +5,8 @@ const Student = require("../models/Student");
 const Book = require("../models/Book");
 const Librarian = require("../models/Librarian");
 const BookStore = require("../models/BookStore");
+const BookImport = require("../models/BookImport");
+const BookIR = require("../models/BookIR");
 
 
 
@@ -50,9 +52,26 @@ exports.getAllBook=async (req,res)=>{
     
     try {
         const book=await Book.find({});
+
+        const bookStore=await BookStore.find({});
+
+        const data=[]
+        for (let i = 0; i < book.length; i++) {
+            data[i]={
+                bookCode:book[i].bookCode,
+                title:book[i].title,
+                author:book[i].author,
+                price:book[i].price,
+                totalQuantity:bookStore[i].totalQuantity,
+                issueQuantity:bookStore[i].issueQuantity,
+
+            }
+            
+        }
+        
         return res.status(200).json({
             status:true,
-            book
+            book:data
         })
         
     } catch (error) {
@@ -72,6 +91,25 @@ exports.getParticularBook=async (req,res)=>{
         return res.status(200).json({
             status:true,
             book
+        })
+        
+    } catch (error) {
+        return res.status(200).json({
+            code:"ERROR",
+            status:false
+        })
+    }
+    
+}
+
+exports.getBookDataByCode=async (req,res)=>{
+    console.log(req.params)
+    try {
+        const data=await Book.findOne({bookCode:req.params.bookCode}) 
+        console.log(req.params.bookCode);
+        return res.status(200).json({
+            status:true,
+            data
         })
         
     } catch (error) {
@@ -145,6 +183,43 @@ exports.getParticularBookStoreData=async (req,res)=>{
         return res.status(200).json({
             status:true,
             bookStore
+        })
+        
+    } catch (error) {
+        return res.status(200).json({
+            code:"ERROR",
+            status:false 
+        })
+    }
+    
+}
+
+exports.getBookImportHistory=async (req,res)=>{
+    
+    try {
+        const bookImport=await BookImport.find({});
+        return res.status(200).json({
+            status:true,
+            bookImport
+        })
+        
+    } catch (error) {
+        return res.status(200).json({
+            code:"ERROR",
+            status:false 
+        })
+    }
+    
+}
+
+exports.getIssueReturnHistory=async (req,res)=>{
+    
+    try {
+        let data=await BookIR.find({});
+        
+        return res.status(200).json({
+            status:true,
+            data
         })
         
     } catch (error) {

@@ -9,6 +9,14 @@ const Schema = new mongoose.Schema({
         type:String,
         require:true
     },
+    studentEmail:{
+        type:String,
+        require:true
+    },
+    librarianEmail:{
+        type:String,
+        require:true
+    },
     date: {
         type:Date,
         default:Date.now

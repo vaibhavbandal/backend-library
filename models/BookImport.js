@@ -1,18 +1,18 @@
 const mongoose = require("mongoose");
 
 const Schema = new mongoose.Schema({
-    book: {
-        type: mongoose.Types.ObjectId,
+    bookCode: {
+        type: String,
         require: true,
     },
     importDate: {
         type: Date,
-        default:Date.now
+        default:Date.now 
     },
     quantity: {
         type: Number, 
-        require: true,
-    }
+        require: true, 
+    } 
 });
 
 const BookImport= mongoose.model("BookImport", Schema);

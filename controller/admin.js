@@ -113,7 +113,7 @@ exports.changePassword = async (req, res) => {
 
         if (!email || !password) {
             return res.status(200).json({
-                changedPassword: false,
+                status: false,
                 code: "BODY_DATA_MISSING",
             })
         }
@@ -121,15 +121,15 @@ exports.changePassword = async (req, res) => {
         const isAdmin = await Admin.findOne({ email: email });
         if (!isAdmin) {
             return res.status(200).json({
-                changedPassword: false,
+                status: false,
                 code: "UNREGISTERED EMAIL",
             })
         }
 
         if (! await bcrypt.compare(password, isAdmin.password)) {
             return res.status(200).json({
-                changedPassword: false,
-                code: "WRONG PASSWORD",
+                status: false,
+                code: "OLD WRONG PASSWORD",
             })
         }
 
@@ -141,20 +141,20 @@ exports.changePassword = async (req, res) => {
 
         if (!changedPassword) {
             return res.status(200).json({
-                changedPassword: false,
+                status: false,
                 code: "ERROR OCCURED WHILE CHANGING PASSWORD",
             })
         }
 
         return res.status(200).json({
-            changedPassword: true,
+            status: true,
             code: "PASSWORD IS CHANGED SUCCESSFULLY",
         })
 
 
     } catch (error) {
-        return res.status(400).json({
-            adminSignUp: false,
+        return res.status(200).json({
+            status: false,
             code: "API_CALLING_ERROR",
         })
     }
@@ -167,8 +167,7 @@ exports.checkingBookCode = async (req, res) => {
         const { bookCode } = req.body;
         if (!bookCode) {
             return res.status(200).json({
-                status: "ERROR",
-                found:false,
+                status: false,
                 code: "BODY_DATA_MISSING",
             })
         }
@@ -177,20 +176,18 @@ exports.checkingBookCode = async (req, res) => {
         const book = await Book.findOne({ bookCode: bookCode });
         if (!book) {
             return res.status(200).json({
-                status: "OK",
-                found: false,
+                status: false,
                 code: "BOOK IS NOT FOUND",
             })
         }
 
         return res.status(200).json({
-            status: "OK",
-            found: true,
+            status: true,
             code: "BOOK IS FOUND",
         })
     } catch (error) {
-        return res.status(400).json({
-            status: "ERROR",
+        return res.status(200).json({
+            status: false,
             code: "API_CALLING_ERROR",
         })
     }
@@ -198,8 +195,10 @@ exports.checkingBookCode = async (req, res) => {
 exports.importBooks = async (req, res) => {
 
 
-    const { bookCode, quantity } = req.body;
+    let { bookCode, quantity } = req.body;
 
+    quantity=parseInt(quantity);
+    
     const book = await Book.findOne({ bookCode: bookCode });
     if (!book) {
 
@@ -212,7 +211,7 @@ exports.importBooks = async (req, res) => {
             })
 
             const newBookImport = new BookImport({
-                book: newBookEntry._id,
+                bookCode: newBookEntry.bookCode,
                 quantity: quantity
             })
 
@@ -227,15 +226,14 @@ exports.importBooks = async (req, res) => {
             await newBookStore.save();
 
             return res.status(200).json({
+                status:true,
                 code: "IMPORTED_NEW",
-                message: "NEW BOOK IS REGISTERED SUCCESSFULLY",
             })
 
         } catch (error) {
             return res.status(400).json({
-                status: "ERROR",
-                code2: "API_CALLING_ERROR1",
-                error
+                status: false,
+                code: "API_CALLING_ERROR1",
             })
         }
 
@@ -246,7 +244,7 @@ exports.importBooks = async (req, res) => {
 
             // EXISTING BOOK REGISTRATION OR IMPORT
             const newBookImport = new BookImport({
-                book: book._id,
+                bookCode: book.bookCode,
                 quantity: quantity
             })
             await newBookImport.save();
@@ -259,16 +257,16 @@ exports.importBooks = async (req, res) => {
                 totalQuantity: prevBookStore.totalQuantity + quantity
             })
 
+
             return res.status(200).json({
+                status:true,
                 code: "IMPORTED_EXISTING",
-                message: "EXISTING BOOK IS REGISTERED SUCCESSFULLY",
-            })
+            }) 
 
         } catch (error) {
             return res.status(400).json({
-                status: "ERROR",
+                status: false,
                 code: "API_CALLING_ERROR2",
-                error 
             })
         }
     }
@@ -301,7 +299,6 @@ exports.registerNewLibrarian = async (req, res) => {
             return res.status(200).json({
                 status:false,
                 code: "DUPLICATE_EMAIL",
-                message: "THIS EMAIL IS ALREADY REGISTERED",
             })
         }
         return res.status(200).json({
