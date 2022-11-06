@@ -21,7 +21,7 @@ app.use('/api/v1/librarian',require('./routes/librarian'));
 app.use('/api/v1/student',require('./routes/student'));
 app.use('/api/v1/common',require('./routes/common'));
 
-app.get('test',(req,res)=>{
+app.get('/test',(req,res)=>{
     res.send('testing done!');
 })
 
@@ -32,6 +32,6 @@ database()
 
 
 const PORT = process.env.PORT || 8000;
-app.listen(PORT , ()=> console.log(`Codetpoint Server Started At PORT ${PORT}`));
+app.listen(PORT , ()=> console.log(`Library Server Started At PORT ${PORT}`));
 
 
