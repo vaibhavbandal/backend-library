@@ -4,9 +4,7 @@ const jwt=require('jsonwebtoken');
 exports.getToken= (user)=>{
     const token= jwt.sign({
         ID:user._id,email:user.email,type:user.type
-    },process.env.SECRET,{
-        expiresIn : "48h"
-    })
+    },process.env.SECRET)
 
     return token;
 }
