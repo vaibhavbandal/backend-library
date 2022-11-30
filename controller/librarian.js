@@ -29,13 +29,13 @@ exports.librarianLogin = async (req, res) => {
                 code: "EMAIL IS NOT REGISTERED",
             })
         }
-
+        // console.info('32')
+        
         const isPasswordOk = await bcrypt.compare(password, isLibrarian.password);
         if (isPasswordOk) {
-
             // generating token
             const token = getToken(isLibrarian);
-
+            console.info(token)
             return res.status(200).header({
                 "Authorization": token
             }).json({
@@ -43,12 +43,13 @@ exports.librarianLogin = async (req, res) => {
                 code: "LOGIN_SUCCESSFULLY",
             })
         } else {
+            console.info('47')
             return res.status(200).json({
                 login: false,
                 code: "WRONG EMAIL OR PASSWORD",
             })
         }
-
+        
     } catch (error) {
         return res.status(200).json({
             login: false,
