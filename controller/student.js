@@ -62,6 +62,13 @@ exports.changePassword = async (req, res) => {
 
         const { email, password, newPassword } = req.body;
 
+        if(email==='gueststudent@gmail.com'){
+            return res.status(200).json({
+                status: false,
+                code: "GUEST_CANNOT_RESET_PASSWORD!",
+            })
+        }
+
         if (!email || !password || !newPassword) {
             return res.status(200).json({
                 status: false,
